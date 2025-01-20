@@ -1,10 +1,12 @@
 import numpy as np
 from music21 import *
+import tkinter as tk
+from tkinter, import ttk, filedialog
 
 class MelodyHarmonizer:
     def __init__(self):
         # Define common chord progressions in different keys
-        self.common_progressions = {
+        self.style_progressions= {
             'major': [
                 ['I', 'IV', 'V', 'I'],
                 ['I', 'vi', 'IV', 'V'],
@@ -17,7 +19,6 @@ class MelodyHarmonizer:
             ]
         }
         
-        # Define chord structures (intervals from root)
         self.chord_structures = {
             'major': [0, 4, 7],      # Major triad
             'minor': [0, 3, 7],      # Minor triad
@@ -26,13 +27,10 @@ class MelodyHarmonizer:
 
     def analyze_melody(self, melody_stream):
         """Analyze the given melody to determine key and important features"""
-        # Get key signature
         key = melody_stream.analyze('key')
         
-        # Extract time signature
         time_sig = melody_stream.getTimeSignatures()[0]
         
-        # Get melody notes
         notes = melody_stream.flatten().notesAndRests
         
         return key, time_sig, notes
