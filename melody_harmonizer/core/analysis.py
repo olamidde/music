@@ -1,9 +1,19 @@
 import numpy as np
-from music21 import *
+from music21 import stream, note, meter, key
 import tkinter as tk
-from tkinter, import ttk, filedialog
+from dataclass import dataclass
+from typing import List, Tuple
 
-class MelodyHarmonizer:
+@dataclass
+class MelodyAnalysis:
+    key: key.key
+    time_signature : meter.TimeSignature
+    phrases : List[List[note.Note]]
+    rhythm_patterns: List[List[float]]
+    contour: List[int]
+    peak_notes: List[note.Note]
+    
+class MelodyAnalayzer:
     def __init__(self):
         # Define common chord progressions in different keys
         self.style_progressions= {
@@ -25,16 +35,30 @@ class MelodyHarmonizer:
             'dominant': [0, 4, 7, 10] # Dominant seventh
         }
 
-    def analyze_melody(self, melody_stream):
-        """Analyze the given melody to determine key and important features"""
-        key = melody_stream.analyze('key')
+    def analyze_melody(self, melody: stream.Stream) -> MelodyAnalysis:
         
-        time_sig = melody_stream.getTimeSignatures()[0]
+        """Perform comprehensive analysis of the melody"""
         
-        notes = melody_stream.flatten().notesAndRests
+        key_sig = self.get_key(melody)
+        time_sig = self.get_time_signature(melody)
         
-        return key, time_sig, notes
-
+        
+        notes = melody.flatten().notesAndRests
+        phrases = self.detect_phrases(notes)
+        rhythm_patterns = self.analyze_rhythm(notes)
+        countour = self.analyze_contour(notes)
+        peak_notes = self.detect_peak_notes(notes)
+        
+        return MelodyAnalysis(key_sig, time_sig, phrases, rhythm_patterns, countour, peak_notes)
+    
+    
+    def _get_key(self, melody: stream.Stream) -> key.Key:
+        return melody.analyze('key')
+    
+    def _get_time_signature(self, melody: stream.Stream) -> meter.TimeSignature:
+        time_sigs = melody.getTimeSignatures()
+        return time_sigs[0] if time_sigs else meter.TimeSignature
+        
     def generate_harmony(self, melody_stream, style='simple'):
         """Generate harmony for the given melody"""
         # Analyze melody
