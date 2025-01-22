@@ -61,7 +61,6 @@ class VoicingGenerator:
             voiced_chord = self.generate_voicing(extended_cord, config, melody_note)
             
             # apply voice leading if there is a previous chord 
-            
             if prev_chord:
                 voiced_chord = self.apply_voice_leading(prev_chord, voiced_chord, config)
             
@@ -146,3 +145,50 @@ class VoicingGenerator:
             interval_semitones -= 12
             
         return curr_octave
+
+    def apply_voice_leading(self, prev_chord: chord.Chord, current_chord: chord.Chord, config: VoicingConfig) -> chord.Chord:
+        """Apply voice leading to the current chord based on the previous chord."""
+        pass
+    
+    def fix_parallel_motion(self, prev_chord : chord.Chord, curr_chord: chord.Chord) -> chord.Chord:
+        
+        "Adjust voicing to avoid parallell motion"
+
+        for i in range(1, len(curr_chord.pitches)):
+            original_pitch = curr_chord.pitches[i].midi 
+            
+            for step in [-2, -1, 1, 2]:
+                curr_chord.pitches[i].midi = original_pitch + step
+                if not self.is_parallel_motion(prev_chord.pitches[i], original_pitch):
+                    return curr_chord
+            
+            curr_chord.pitches[i].midi = original_pitch
+        
+        return curr_chord
+    
+    def minimize_voice_movement(self, prev_chord : chord.Chord, curr_chord: chord.Chord, config: VoicingConfig) -> chord.Chord:
+        """ Minimize movement between voices in consecutive chords"""
+        
+        for i in range(len(curr_chord.pitches)):
+            curr_pitch = curr_chord.pitches[i]
+            target_pitch = prev_chord.pitches[i]
+            
+            while abs(curr_pitch - target_pitch) > 6:
+                if curr_pitch < target_pitch:
+                    curr_pitch += 12
+                else:
+                    curr_pitch -= 12
+            
+            if i > 0:
+                prev_voice = curr_chord.pitches[i - 1]
+                if curr_pitch - prev_voice < config.min_spacing:
+                    break
+            if i < len(curr_chord.pitches) - 1:
+                next_voice = curr_chord[i + 1].midi
+                if next_voice - curr_pitch < config.min_spacing:
+                    break 
+            
+            curr_chord.pitches[i].midi = curr_pitch
+                   
+        return curr_chord
+                    
