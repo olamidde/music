@@ -89,4 +89,5 @@ class MelodyHarmonizer:
         score.append(harmony_part)
         
         return score
+
     
