@@ -90,4 +90,3 @@ class MelodyHarmonizer:
         
         return score
     
-    def _generate_simple_note()
