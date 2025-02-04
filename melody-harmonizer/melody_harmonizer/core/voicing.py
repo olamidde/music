@@ -191,4 +191,3 @@ class VoicingGenerator:
             curr_chord.pitches[i].midi = curr_pitch
                    
         return curr_chord
-                    
